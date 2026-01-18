@@ -7,10 +7,19 @@ const loadingEl = document.getElementById('loading');
 const resultsEl = document.getElementById('results');
 const scoreValueEl = document.getElementById('score-value');
 const detailsListEl = document.getElementById('details-list');
+const franchiseFilterEl = document.getElementById('franchise-filter');
+
+let currentPlaces = [];
 
 // App Initialization
 document.addEventListener('DOMContentLoaded', () => {
     initMap('map', handleLocationSelect);
+
+    // Filter Event Listener
+    franchiseFilterEl.addEventListener('input', (e) => {
+        const filterText = e.target.value.toLowerCase();
+        filterPlaces(filterText);
+    });
 });
 
 async function handleLocationSelect(lat, lon) {
@@ -18,15 +27,18 @@ async function handleLocationSelect(lat, lon) {
     showLoading(true);
     resultsEl.classList.add('hidden');
 
+    // Reset Filter
+    franchiseFilterEl.value = '';
+
     try {
         // 1. Fetch Data
-        const places = await fetchNearbyPlaces(lat, lon, 500); // 500m radius
+        currentPlaces = await fetchNearbyPlaces(lat, lon, 500); // 500m radius
 
         // 2. Perform Analysis
-        const { score, breakdown } = calculateScore(places);
+        const { score, breakdown } = calculateScore(currentPlaces);
 
         // 3. Update Map
-        showPlacesOnMap(places);
+        showPlacesOnMap(currentPlaces);
 
         // 4. Update UI
         renderResults(score, breakdown);
@@ -37,6 +49,17 @@ async function handleLocationSelect(lat, lon) {
     } finally {
         showLoading(false);
     }
+}
+
+function filterPlaces(filterText) {
+    if (!currentPlaces.length) return;
+
+    const filteredPlaces = currentPlaces.filter(place =>
+        place.name.toLowerCase().includes(filterText) ||
+        place.type.toLowerCase().includes(filterText)
+    );
+
+    showPlacesOnMap(filteredPlaces);
 }
 
 function showLoading(show) {

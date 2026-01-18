@@ -1,51 +1,58 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ProLoc - Location Potential Analysis</title>
-    <link rel="stylesheet" href="./style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  </head>
-  <body>
-    <div id="app">
-      <aside class="sidebar">
-        <div class="logo">
-          <h1>ProLoc</h1>
-          <p>Location Intelligence</p>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProLoc - Location Potential Analysis</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div id="app">
+    <aside class="sidebar">
+      <div class="logo">
+        <h1>ProLoc</h1>
+        <p>Location Intelligence</p>
+      </div>
+
+      <div class="controls">
+        <p class="instruction">Click on the map to analyze a location.</p>
+
+        <div class="search-container">
+          <input type="text" id="franchise-filter" placeholder="Search franchise or business..." autocomplete="off">
         </div>
-        
-        <div class="controls">
-          <p class="instruction">Click on the map to analyze a location.</p>
-          
-          <div id="loading" class="hidden">
-            <div class="spinner"></div>
-            <span>Analyzing...</span>
+
+        <div id="loading" class="hidden">
+          <div class="spinner"></div>
+          <span>Analyzing...</span>
+        </div>
+
+        <div id="results" class="hidden">
+          <div class="score-card">
+            <h3>Potential Score</h3>
+            <div class="score-circle" id="score-value">--</div>
           </div>
 
-          <div id="results" class="hidden">
-            <div class="score-card">
-              <h3>Potential Score</h3>
-              <div class="score-circle" id="score-value">--</div>
-            </div>
-            
-            <div class="details">
-              <h4>Nearby Analysis</h4>
-              <ul id="details-list">
-                <!-- Items will be injected here -->
-              </ul>
-            </div>
+          <div class="details">
+            <h4>Nearby Analysis</h4>
+            <ul id="details-list">
+              <!-- Items will be injected here -->
+            </ul>
           </div>
         </div>
-      </aside>
-      
-      <main id="map-container">
-        <div id="map"></div>
-      </main>
-    </div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+      </div>
+    </aside>
+
+    <main id="map-container">
+      <div id="map"></div>
+    </main>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+
 </html>
