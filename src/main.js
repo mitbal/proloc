@@ -111,6 +111,9 @@ import { renderVoronoiTreemap } from './viz/voronoi.js';
 const csvUploadEl = document.getElementById('csv-upload');
 const vizOverlayEl = document.getElementById('viz-overlay');
 const closeVizBtn = document.getElementById('close-viz');
+const regenerateVizBtn = document.getElementById('regenerate-viz');
+
+let currentVizData = null;
 
 if (csvUploadEl) {
     csvUploadEl.addEventListener('change', (e) => {
@@ -134,6 +137,14 @@ if (csvUploadEl) {
 if (closeVizBtn) {
     closeVizBtn.addEventListener('click', () => {
         vizOverlayEl.classList.add('hidden');
+    });
+}
+
+if (regenerateVizBtn) {
+    regenerateVizBtn.addEventListener('click', () => {
+        if (currentVizData) {
+            renderVoronoiTreemap(currentVizData, 'viz-container');
+        }
     });
 }
 
@@ -187,6 +198,7 @@ function parseCSV(text) {
 }
 
 function showVisualization(data) {
+    currentVizData = data;
     vizOverlayEl.classList.remove('hidden');
     // Allow UI to update before rendering (width/height needs to be calculated)
     setTimeout(() => {
