@@ -113,6 +113,8 @@ const vizOverlayEl = document.getElementById('viz-overlay');
 const closeVizBtn = document.getElementById('close-viz');
 const regenerateVizBtn = document.getElementById('regenerate-viz');
 
+const colorSchemeSelect = document.getElementById('color-scheme-select');
+
 let currentVizData = null;
 
 if (csvUploadEl) {
@@ -143,7 +145,15 @@ if (closeVizBtn) {
 if (regenerateVizBtn) {
     regenerateVizBtn.addEventListener('click', () => {
         if (currentVizData) {
-            renderVoronoiTreemap(currentVizData, 'viz-container');
+            renderVoronoiTreemap(currentVizData, 'viz-container', colorSchemeSelect.value);
+        }
+    });
+}
+
+if (colorSchemeSelect) {
+    colorSchemeSelect.addEventListener('change', () => {
+        if (currentVizData) {
+            renderVoronoiTreemap(currentVizData, 'viz-container', colorSchemeSelect.value);
         }
     });
 }
@@ -202,6 +212,6 @@ function showVisualization(data) {
     vizOverlayEl.classList.remove('hidden');
     // Allow UI to update before rendering (width/height needs to be calculated)
     setTimeout(() => {
-        renderVoronoiTreemap(data, 'viz-container');
+        renderVoronoiTreemap(data, 'viz-container', colorSchemeSelect.value);
     }, 10);
 }

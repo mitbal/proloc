@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { voronoiTreemap } from 'd3-voronoi-treemap';
 
-export function renderVoronoiTreemap(data, containerId) {
+export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10') {
     const container = document.getElementById(containerId);
     if (!container) return;
 
@@ -74,16 +74,15 @@ export function renderVoronoiTreemap(data, containerId) {
         .append("g")
         .attr("class", "cell");
 
+    // Create color scale once
+    const colorScale = getColorScale(colorScheme);
+
     cellGroups.append("path")
         .attr("d", d => "M" + d.polygon.join("L") + "Z")
         .attr("class", "voronoi-cell")
         .style("fill", (d) => {
-            // Color by group if available, otherwise by index
-            if (hasGroups && d.parent) {
-                // Use parent name (group name) to hash color
-                return stringToColor(d.parent.data.name);
-            }
-            return d3.schemeTableau10[d.data.name.length % 10];
+            const key = (hasGroups && d.parent && d.parent.depth > 0) ? d.parent.data.name : d.data.name;
+            return colorScale(key);
         })
         .style("stroke", "#fff")
         .style("stroke-width", "0.5px");
@@ -110,7 +109,11 @@ export function renderVoronoiTreemap(data, containerId) {
         .style("pointer-events", "none")
         .style("text-anchor", "middle")
         .style("font-size", d => Math.min(12, Math.sqrt(d.polygonSite.weight) * 2) + "px") // simple scaling
-        .style("fill", "#333"); // Ensure text is visible
+        .style("fill", (d) => {
+            // Adapt text color to background if it's very dark
+            if (colorScheme === 'dark') return '#fff';
+            return '#333';
+        });
 
     // Tooltip
     cellGroups.append("title")
@@ -120,12 +123,21 @@ export function renderVoronoiTreemap(data, containerId) {
         });
 }
 
-// Helper for consistent colors
-function stringToColor(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+function getColorScale(scheme) {
+    switch (scheme) {
+        case 'category10':
+            return d3.scaleOrdinal(d3.schemeCategory10);
+        case 'pastel1':
+            return d3.scaleOrdinal(d3.schemePastel1);
+        case 'dark':
+            const darkColors = ['#1f2937', '#374151', '#4b5563', '#6b7280', '#111827'];
+            return d3.scaleOrdinal(darkColors);
+        case 'cool':
+            return d3.scaleOrdinal(d3.quantize(d3.interpolateCool, 10));
+        case 'warm':
+            return d3.scaleOrdinal(d3.quantize(d3.interpolateWarm, 10));
+        case 'tableau10':
+        default:
+            return d3.scaleOrdinal(d3.schemeTableau10);
     }
-    const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
-    return '#' + '00000'.substring(0, 6 - c.length) + c;
 }
