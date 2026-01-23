@@ -114,6 +114,8 @@ const closeVizBtn = document.getElementById('close-viz');
 const regenerateVizBtn = document.getElementById('regenerate-viz');
 
 const colorSchemeSelect = document.getElementById('color-scheme-select');
+const showValuesCheckbox = document.getElementById('show-values-checkbox');
+
 
 let currentVizData = null;
 
@@ -145,7 +147,7 @@ if (closeVizBtn) {
 if (regenerateVizBtn) {
     regenerateVizBtn.addEventListener('click', () => {
         if (currentVizData) {
-            renderVoronoiTreemap(currentVizData, 'viz-container', colorSchemeSelect.value);
+            renderVoronoiTreemap(currentVizData, 'viz-container', colorSchemeSelect.value, showValuesCheckbox.checked);
         }
     });
 }
@@ -153,7 +155,15 @@ if (regenerateVizBtn) {
 if (colorSchemeSelect) {
     colorSchemeSelect.addEventListener('change', () => {
         if (currentVizData) {
-            renderVoronoiTreemap(currentVizData, 'viz-container', colorSchemeSelect.value);
+            renderVoronoiTreemap(currentVizData, 'viz-container', colorSchemeSelect.value, showValuesCheckbox.checked);
+        }
+    });
+}
+
+if (showValuesCheckbox) {
+    showValuesCheckbox.addEventListener('change', () => {
+        if (currentVizData) {
+            renderVoronoiTreemap(currentVizData, 'viz-container', colorSchemeSelect.value, showValuesCheckbox.checked);
         }
     });
 }
@@ -212,6 +222,6 @@ function showVisualization(data) {
     vizOverlayEl.classList.remove('hidden');
     // Allow UI to update before rendering (width/height needs to be calculated)
     setTimeout(() => {
-        renderVoronoiTreemap(data, 'viz-container', colorSchemeSelect.value);
+        renderVoronoiTreemap(data, 'viz-container', colorSchemeSelect.value, showValuesCheckbox.checked);
     }, 10);
 }

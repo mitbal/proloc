@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { voronoiTreemap } from 'd3-voronoi-treemap';
 
-export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10') {
+export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10', showValues = false) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
@@ -49,6 +49,9 @@ export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10
     const hierarchy = d3.hierarchy(rootData)
         .sum(d => d.value)
         .sort((a, b) => b.value - a.value);
+
+    // Calculate total value for percentage
+    const totalValue = hierarchy.value;
 
     // Voronoi Treemap computation
     const _voronoiTreemap = voronoiTreemap()
@@ -101,25 +104,38 @@ export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10
     }
 
     // Labels
-    cellGroups.append("text")
+    const labels = cellGroups.append("text")
         .attr("x", d => d3.polygonCentroid(d.polygon)[0])
         .attr("y", d => d3.polygonCentroid(d.polygon)[1])
         .attr("class", "voronoi-label")
-        .text(d => d.data.name)
         .style("pointer-events", "none")
         .style("text-anchor", "middle")
-        .style("font-size", d => Math.min(12, Math.sqrt(d.polygonSite.weight) * 2) + "px") // simple scaling
-        .style("fill", (d) => {
-            // Adapt text color to background if it's very dark
-            if (colorScheme === 'dark') return '#fff';
-            return '#333';
-        });
+        .style("font-size", "12px");
+
+    // Name
+    labels.append("tspan")
+        .attr("x", d => d3.polygonCentroid(d.polygon)[0])
+        .attr("dy", showValues ? "-0.6em" : "0.3em") // Shift up if showing values, otherwise center
+        .text(d => d.data.name);
+
+    // Value and Percentage
+    if (showValues) {
+        labels.append("tspan")
+            .attr("x", d => d3.polygonCentroid(d.polygon)[0])
+            .attr("dy", "1.2em")
+            .style("font-size", "0.8em")
+            .style("opacity", 0.8)
+            .text(d => {
+                const percent = (d.value / totalValue * 100).toFixed(1);
+                return `${d.value} (${percent}%)`;
+            });
+    }
 
     // Tooltip
     cellGroups.append("title")
         .text(d => {
             const group = hasGroups && d.parent ? `(${d.parent.data.name}) ` : "";
-            return `${d.data.name} ${group}: ${d.value}`;
+            return `${d.data.name} ${group}: ${d.value} (${(d.value / totalValue * 100).toFixed(2)}%)`;
         });
 }
 
