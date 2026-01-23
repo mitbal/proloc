@@ -110,7 +110,10 @@ export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10
         .attr("class", "voronoi-label")
         .style("pointer-events", "none")
         .style("text-anchor", "middle")
-        .style("font-size", "12px");
+        .style("font-size", d => {
+            const size = Math.max(14, Math.min(36, Math.sqrt(d.value) * 2.5));
+            return size + "px";
+        });
 
     // Name
     labels.append("tspan")
