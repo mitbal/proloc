@@ -101,7 +101,95 @@ function renderResults(score, breakdown) {
 }
 
 function getScoreColor(score) {
-    if (score >= 80) return '#10b981'; // Green
     if (score >= 50) return '#f59e0b'; // Yellow
     return '#ef4444'; // Red
+}
+
+// --- CSV Upload & Visualization ---
+import { renderVoronoiTreemap } from './viz/voronoi.js';
+
+const csvUploadEl = document.getElementById('csv-upload');
+const vizOverlayEl = document.getElementById('viz-overlay');
+const closeVizBtn = document.getElementById('close-viz');
+
+if (csvUploadEl) {
+    csvUploadEl.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const text = event.target.result;
+            const data = parseCSV(text);
+            if (data.length > 0) {
+                showVisualization(data);
+            } else {
+                alert("Invalid or empty CSV.");
+            }
+        };
+        reader.readAsText(file);
+    });
+}
+
+if (closeVizBtn) {
+    closeVizBtn.addEventListener('click', () => {
+        vizOverlayEl.classList.add('hidden');
+    });
+}
+
+function parseCSV(text) {
+    // Simple parser for "group,name,value" or "name,value" CSV
+    // Assumes header row exists
+    console.log("Parsing CSV, length:", text.length);
+    const lines = text.trim().split(/\r?\n/);
+    console.log("Lines found:", lines.length);
+    if (lines.length < 2) return [];
+
+    const result = [];
+    const headers = lines[0].toLowerCase().split(',').map(h => h.trim());
+
+    // Find indices for 'name', 'value' and optional 'group'
+    let nameIdx = headers.indexOf('name');
+    let valueIdx = headers.indexOf('value');
+    let groupIdx = headers.indexOf('group');
+    if (groupIdx === -1) groupIdx = headers.indexOf('category');
+
+    // Fallbacks if headers are missing or non-standard
+    if (nameIdx === -1) nameIdx = 0;
+    if (valueIdx === -1) valueIdx = 1;
+    // If group is not found in headers, groupIdx remains -1
+
+    // If we have 3 columns and didn't find specific headers, try to guess
+    // explicit "Group, Name, Value" structure if headers are ambiguous?
+    // For now, rely on headers or default 0/1 for name/value.
+
+    for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+
+        const parts = line.split(',');
+
+        if (parts.length >= 2) {
+            const name = parts[nameIdx] ? parts[nameIdx].trim() : "Unknown";
+            const value = parseFloat(parts[valueIdx] ? parts[valueIdx].trim() : "0");
+            let group = null;
+
+            if (groupIdx !== -1 && parts[groupIdx]) {
+                group = parts[groupIdx].trim();
+            }
+
+            if (name && !isNaN(value)) {
+                result.push({ name, value, group });
+            }
+        }
+    }
+    return result;
+}
+
+function showVisualization(data) {
+    vizOverlayEl.classList.remove('hidden');
+    // Allow UI to update before rendering (width/height needs to be calculated)
+    setTimeout(() => {
+        renderVoronoiTreemap(data, 'viz-container');
+    }, 10);
 }

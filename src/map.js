@@ -1,74 +1,162 @@
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-
-// Fix for default marker icons in Vite/Webpack
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-
-let DefaultIcon = L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41]
-});
-
-L.Marker.prototype.options.icon = DefaultIcon;
-
 let map;
-let markersLayer;
+let markers = [];
 let selectedLocationMarker;
+let mapService;
 
 export function initMap(containerId, onClickCallback) {
-    // Default to Jakarta
-    map = L.map(containerId).setView([-6.2088, 106.8456], 13);
+    const defaultLocation = { lat: -6.2088, lng: 106.8456 }; // Jakarta
 
-    // Dark mode tiles (CartoDB Dark Matter)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: 'abcd',
-        maxZoom: 20
-    }).addTo(map);
+    map = new google.maps.Map(document.getElementById(containerId), {
+        center: defaultLocation,
+        zoom: 13,
+        styles: [
+            { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+            { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+            {
+                featureType: "administrative.locality",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#d59563" }],
+            },
+            {
+                featureType: "poi",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#d59563" }],
+            },
+            {
+                featureType: "poi.park",
+                elementType: "geometry",
+                stylers: [{ color: "#263c3f" }],
+            },
+            {
+                featureType: "poi.park",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#6b9a76" }],
+            },
+            {
+                featureType: "road",
+                elementType: "geometry",
+                stylers: [{ color: "#38414e" }],
+            },
+            {
+                featureType: "road",
+                elementType: "geometry.stroke",
+                stylers: [{ color: "#212a37" }],
+            },
+            {
+                featureType: "road",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#9ca5b3" }],
+            },
+            {
+                featureType: "road.highway",
+                elementType: "geometry",
+                stylers: [{ color: "#746855" }],
+            },
+            {
+                featureType: "road.highway",
+                elementType: "geometry.stroke",
+                stylers: [{ color: "#1f2835" }],
+            },
+            {
+                featureType: "road.highway",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#f3d19c" }],
+            },
+            {
+                featureType: "transit",
+                elementType: "geometry",
+                stylers: [{ color: "#2f3948" }],
+            },
+            {
+                featureType: "transit.station",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#d59563" }],
+            },
+            {
+                featureType: "water",
+                elementType: "geometry",
+                stylers: [{ color: "#17263c" }],
+            },
+            {
+                featureType: "water",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#515c6d" }],
+            },
+            {
+                featureType: "water",
+                elementType: "labels.text.stroke",
+                stylers: [{ color: "#17263c" }],
+            },
+        ],
+        disableDefaultUI: true, // Clean look
+    });
 
-    markersLayer = L.layerGroup().addTo(map);
+    mapService = new google.maps.places.PlacesService(map);
 
-    map.on('click', (e) => {
-        const { lat, lng } = e.latlng;
+    map.addListener("click", (e) => {
+        const lat = e.latLng.lat();
+        const lng = e.latLng.lng();
 
         // Update selection marker
         if (selectedLocationMarker) {
-            map.removeLayer(selectedLocationMarker);
+            selectedLocationMarker.setMap(null);
         }
-        selectedLocationMarker = L.marker([lat, lng], {
-            icon: L.divIcon({
-                className: 'custom-pin',
-                html: '<div style="background-color: #3b82f6; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>',
-                iconSize: [12, 12],
-                iconAnchor: [6, 6]
-            })
-        }).addTo(map);
+
+        selectedLocationMarker = new google.maps.Marker({
+            position: { lat, lng },
+            map: map,
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 7,
+                fillColor: "#3b82f6",
+                fillOpacity: 1,
+                strokeWeight: 2,
+                strokeColor: "white",
+            },
+        });
 
         onClickCallback(lat, lng);
     });
 }
 
+export function getMapService() {
+    return mapService;
+}
+
 export function showPlacesOnMap(places) {
-    markersLayer.clearLayers();
+    // Clear existing markers
+    markers.forEach(marker => marker.setMap(null));
+    markers = [];
 
     places.forEach(place => {
         if (place.lat && place.lon) {
             const color = getCategoryColor(place.category);
 
-            const circleMarker = L.circleMarker([place.lat, place.lon], {
-                radius: 6,
-                fillColor: color,
-                color: '#fff',
-                weight: 1,
-                opacity: 1,
-                fillOpacity: 0.8
+            const marker = new google.maps.Marker({
+                position: { lat: place.lat, lng: place.lon },
+                map: map,
+                title: place.name,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 5,
+                    fillColor: color,
+                    fillOpacity: 0.8,
+                    strokeWeight: 1,
+                    strokeColor: "white",
+                }
             });
 
-            circleMarker.bindPopup(`<b>${place.name}</b><br>${place.type}`);
-            markersLayer.addLayer(circleMarker);
+            // Add info window on click (optional, but good for UX)
+            const infoWindow = new google.maps.InfoWindow({
+                content: `<b>${place.name}</b><br>${place.type}`
+            });
+
+            marker.addListener("click", () => {
+                infoWindow.open(map, marker);
+            });
+
+            markers.push(marker);
         }
     });
 }

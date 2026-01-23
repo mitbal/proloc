@@ -13,6 +13,9 @@
     "vite": "^5.0.0"
   },
   "dependencies": {
+    "d3": "^7.9.0",
+    "d3-delaunay": "^6.0.4",
+    "d3-voronoi-treemap": "^1.1.2",
     "leaflet": "^1.9.4",
     "serve": "^14.2.5"
   }
