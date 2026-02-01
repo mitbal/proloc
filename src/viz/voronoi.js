@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { voronoiTreemap } from 'd3-voronoi-treemap';
 
-export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10', showValues = false) {
+export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10', showValues = false, labelScale = 1.0) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
@@ -112,7 +112,7 @@ export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10
         .style("text-anchor", "middle")
         .style("font-size", d => {
             const size = Math.max(14, Math.min(36, Math.sqrt(d.value) * 2.5));
-            return size + "px";
+            return (size * labelScale) + "px";
         });
 
     // Name

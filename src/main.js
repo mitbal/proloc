@@ -115,9 +115,31 @@ const regenerateVizBtn = document.getElementById('regenerate-viz');
 
 const colorSchemeSelect = document.getElementById('color-scheme-select');
 const showValuesCheckbox = document.getElementById('show-values-checkbox');
+const labelSizeInputEl = document.getElementById('label-size-input');
 
 
 let currentVizData = null;
+
+function renderViz() {
+    if (!currentVizData) return;
+
+    // Get current settings
+    const colorSchemeRaw = colorSchemeSelect.value;
+    // If the user selected 'tableau10', pass that string. Only allow specific strings if valid.
+    // Actually, let's just pass the value directly. validation happens inside voronoi.js or simple switch.
+
+    const showValues = showValuesCheckbox.checked;
+
+    const labelSizePercent = parseInt(labelSizeInputEl.value, 10) || 100;
+    const labelScale = labelSizePercent / 100;
+
+    renderVoronoiTreemap(currentVizData, 'viz-container', colorSchemeRaw, showValues, labelScale);
+}
+
+if (labelSizeInputEl) {
+    labelSizeInputEl.addEventListener('change', renderViz);
+    labelSizeInputEl.addEventListener('input', renderViz); // Update while dragging/typing if preferred, or just change
+}
 
 if (csvUploadEl) {
     csvUploadEl.addEventListener('change', (e) => {
@@ -146,26 +168,16 @@ if (closeVizBtn) {
 
 if (regenerateVizBtn) {
     regenerateVizBtn.addEventListener('click', () => {
-        if (currentVizData) {
-            renderVoronoiTreemap(currentVizData, 'viz-container', colorSchemeSelect.value, showValuesCheckbox.checked);
-        }
+        renderViz();
     });
 }
 
 if (colorSchemeSelect) {
-    colorSchemeSelect.addEventListener('change', () => {
-        if (currentVizData) {
-            renderVoronoiTreemap(currentVizData, 'viz-container', colorSchemeSelect.value, showValuesCheckbox.checked);
-        }
-    });
+    colorSchemeSelect.addEventListener('change', renderViz);
 }
 
 if (showValuesCheckbox) {
-    showValuesCheckbox.addEventListener('change', () => {
-        if (currentVizData) {
-            renderVoronoiTreemap(currentVizData, 'viz-container', colorSchemeSelect.value, showValuesCheckbox.checked);
-        }
-    });
+    showValuesCheckbox.addEventListener('change', renderViz);
 }
 
 function parseCSV(text) {
@@ -222,6 +234,6 @@ function showVisualization(data) {
     vizOverlayEl.classList.remove('hidden');
     // Allow UI to update before rendering (width/height needs to be calculated)
     setTimeout(() => {
-        renderVoronoiTreemap(data, 'viz-container', colorSchemeSelect.value, showValuesCheckbox.checked);
+        renderViz();
     }, 10);
 }
