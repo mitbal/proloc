@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { voronoiTreemap } from 'd3-voronoi-treemap';
 
-export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10', showValues = false, labelScale = 1.0) {
+export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10', showValues = false, labelScale = 1.0, borderColor = '#ffffff', borderWidth = 1) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
@@ -87,8 +87,8 @@ export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10
             const key = (hasGroups && d.parent && d.parent.depth > 0) ? d.parent.data.name : d.data.name;
             return colorScale(key);
         })
-        .style("stroke", "#fff")
-        .style("stroke-width", "0.5px");
+        .style("stroke", borderColor)
+        .style("stroke-width", borderWidth + "px");
 
     // Draw group boundaries (optional, thicker stroke)
     if (hasGroups) {

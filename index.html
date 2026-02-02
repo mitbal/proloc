@@ -73,6 +73,13 @@
               <option value="warm">Warm Gradient</option>
             </select>
             <div style="display: flex; align-items: center; margin-right: 10px;">
+              <label for="border-width-input" style="font-size: 0.9em; margin-right: 5px;">Border:</label>
+              <input type="number" id="border-width-input" value="1" min="0" max="10" step="0.5"
+                style="width: 50px; margin-right: 5px;">
+              <input type="color" id="border-color-input" value="#ffffff"
+                style="width: 30px; height: 30px; padding: 0; border: none; cursor: pointer;">
+            </div>
+            <div style="display: flex; align-items: center; margin-right: 10px;">
               <label for="label-size-input" style="font-size: 0.9em; margin-right: 5px;">Label Size (%):</label>
               <input type="number" id="label-size-input" value="100" min="10" max="300" step="10" style="width: 60px;">
             </div>

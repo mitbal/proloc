@@ -116,6 +116,8 @@ const regenerateVizBtn = document.getElementById('regenerate-viz');
 const colorSchemeSelect = document.getElementById('color-scheme-select');
 const showValuesCheckbox = document.getElementById('show-values-checkbox');
 const labelSizeInputEl = document.getElementById('label-size-input');
+const borderWidthInputEl = document.getElementById('border-width-input');
+const borderColorInputEl = document.getElementById('border-color-input');
 
 
 let currentVizData = null;
@@ -133,12 +135,23 @@ function renderViz() {
     const labelSizePercent = parseInt(labelSizeInputEl.value, 10) || 100;
     const labelScale = labelSizePercent / 100;
 
-    renderVoronoiTreemap(currentVizData, 'viz-container', colorSchemeRaw, showValues, labelScale);
+    const borderWidth = borderWidthInputEl ? parseFloat(borderWidthInputEl.value) : 1;
+    const borderColor = borderColorInputEl ? borderColorInputEl.value : '#ffffff';
+
+    renderVoronoiTreemap(currentVizData, 'viz-container', colorSchemeRaw, showValues, labelScale, borderColor, borderWidth);
 }
 
 if (labelSizeInputEl) {
     labelSizeInputEl.addEventListener('change', renderViz);
     labelSizeInputEl.addEventListener('input', renderViz); // Update while dragging/typing if preferred, or just change
+}
+
+if (borderWidthInputEl) {
+    borderWidthInputEl.addEventListener('input', renderViz);
+}
+
+if (borderColorInputEl) {
+    borderColorInputEl.addEventListener('input', renderViz);
 }
 
 if (csvUploadEl) {
