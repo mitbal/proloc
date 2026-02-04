@@ -88,7 +88,7 @@ export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10
             return colorScale(key);
         })
         .style("stroke", borderColor)
-        .style("stroke-width", borderWidth + "px");
+        .style("stroke-width", (borderWidth * 0.5) + "px"); // Subgroups: thinner
 
     // Draw group boundaries (optional, thicker stroke)
     if (hasGroups) {
@@ -98,8 +98,8 @@ export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10
             .append("path")
             .attr("d", d => "M" + d.polygon.join("L") + "Z")
             .style("fill", "none")
-            .style("stroke", "#333")
-            .style("stroke-width", "1.5px")
+            .style("stroke", borderColor) // Categories: same color as background/leaves (remove black line)
+            .style("stroke-width", (borderWidth * 3) + "px") // Categories: thicker
             .style("pointer-events", "none");
     }
 
