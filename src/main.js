@@ -115,6 +115,7 @@ const regenerateVizBtn = document.getElementById('regenerate-viz');
 
 const colorSchemeSelect = document.getElementById('color-scheme-select');
 const showValuesCheckbox = document.getElementById('show-values-checkbox');
+const showLegendCheckboxEl = document.getElementById('show-legend-checkbox');
 const labelSizeInputEl = document.getElementById('label-size-input');
 const borderWidthInputEl = document.getElementById('border-width-input');
 const borderColorInputEl = document.getElementById('border-color-input');
@@ -131,6 +132,7 @@ function renderViz() {
     // Actually, let's just pass the value directly. validation happens inside voronoi.js or simple switch.
 
     const showValues = showValuesCheckbox.checked;
+    const showLegend = showLegendCheckboxEl ? showLegendCheckboxEl.checked : true;
 
     const labelSizePercent = parseInt(labelSizeInputEl.value, 10) || 100;
     const labelScale = labelSizePercent / 100;
@@ -138,7 +140,7 @@ function renderViz() {
     const borderWidth = borderWidthInputEl ? parseFloat(borderWidthInputEl.value) : 1;
     const borderColor = borderColorInputEl ? borderColorInputEl.value : '#ffffff';
 
-    renderVoronoiTreemap(currentVizData, 'viz-container', colorSchemeRaw, showValues, labelScale, borderColor, borderWidth);
+    renderVoronoiTreemap(currentVizData, 'viz-container', colorSchemeRaw, showValues, labelScale, borderColor, borderWidth, showLegend);
 }
 
 if (labelSizeInputEl) {
@@ -191,6 +193,10 @@ if (colorSchemeSelect) {
 
 if (showValuesCheckbox) {
     showValuesCheckbox.addEventListener('change', renderViz);
+}
+
+if (showLegendCheckboxEl) {
+    showLegendCheckboxEl.addEventListener('change', renderViz);
 }
 
 function parseCSV(text) {

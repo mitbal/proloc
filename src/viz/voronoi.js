@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { voronoiTreemap } from 'd3-voronoi-treemap';
 
-export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10', showValues = false, labelScale = 1.0, borderColor = '#ffffff', borderWidth = 1) {
+export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10', showValues = false, labelScale = 1.0, borderColor = '#ffffff', borderWidth = 1, showLegend = true) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
@@ -11,11 +11,16 @@ export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10
     const width = container.clientWidth;
     const height = container.clientHeight;
 
-    // Circular Clipping
+    // ... rest of the setup
     const cx = width / 2;
     const cy = height / 2;
-    const radius = Math.min(width, height) / 2 - 10; // 10px padding
+    const radius = Math.min(width, height) / 2 - 10;
     const nPoints = 100;
+
+    // If showing legend, adjust visualization area or add legend overlay
+    // For now, let's keep the circle and add legend on the right or bottom if there's space.
+    // Actually, let's just overlay it or put it in a corner.
+
     const clipPolygon = d3.range(nPoints).map(i => {
         const theta = (i / nPoints) * 2 * Math.PI;
         return [
@@ -60,8 +65,6 @@ export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10
     _voronoiTreemap(hierarchy);
 
     const allNodes = hierarchy.descendants();
-    // We primarily want to draw the leaf nodes (the actual items)
-    // But we might want to draw group boundaries too.
     const leaves = allNodes.filter(d => d.height === 0);
     const groups = allNodes.filter(d => d.depth === 1 && d.height > 0);
 
@@ -70,15 +73,15 @@ export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10
         .attr("width", width)
         .attr("height", height);
 
+    // Create color scale once
+    const colorScale = getColorScale(colorScheme);
+
     // Draw leaf cells
     const cellGroups = svg.selectAll("g.cell")
         .data(leaves)
         .enter()
         .append("g")
         .attr("class", "cell");
-
-    // Create color scale once
-    const colorScale = getColorScale(colorScheme);
 
     cellGroups.append("path")
         .attr("d", d => "M" + d.polygon.join("L") + "Z")
@@ -88,9 +91,9 @@ export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10
             return colorScale(key);
         })
         .style("stroke", borderColor)
-        .style("stroke-width", (borderWidth * 0.5) + "px"); // Subgroups: thinner
+        .style("stroke-width", (borderWidth * 0.5) + "px");
 
-    // Draw group boundaries (optional, thicker stroke)
+    // Draw group boundaries
     if (hasGroups) {
         svg.selectAll("path.group")
             .data(groups)
@@ -98,8 +101,8 @@ export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10
             .append("path")
             .attr("d", d => "M" + d.polygon.join("L") + "Z")
             .style("fill", "none")
-            .style("stroke", borderColor) // Categories: same color as background/leaves (remove black line)
-            .style("stroke-width", (borderWidth * 3) + "px") // Categories: thicker
+            .style("stroke", borderColor)
+            .style("stroke-width", (borderWidth * 3) + "px")
             .style("pointer-events", "none");
     }
 
@@ -119,7 +122,7 @@ export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10
     // Name
     labels.append("tspan")
         .attr("x", d => d3.polygonCentroid(d.polygon)[0])
-        .attr("dy", showValues ? "-0.6em" : "0.3em") // Shift up if showing values, otherwise center
+        .attr("dy", showValues ? "-0.6em" : "0.3em")
         .text(d => d.data.name);
 
     // Value and Percentage
@@ -141,7 +144,43 @@ export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10
             const group = hasGroups && d.parent ? `(${d.parent.data.name}) ` : "";
             return `${d.data.name} ${group}: ${d.value} (${(d.value / totalValue * 100).toFixed(2)}%)`;
         });
+
+    // Legend
+    if (showLegend && (hasGroups || leaves.length > 0)) {
+        const legendData = hasGroups ?
+            groups.map(g => g.data.name) :
+            leaves.map(l => l.data.name);
+
+        const legend = svg.append("g")
+            .attr("class", "legend")
+            .attr("transform", `translate(20, 20)`);
+
+        const legendItems = legend.selectAll(".legend-item")
+            .data(legendData)
+            .enter()
+            .append("g")
+            .attr("class", "legend-item")
+            .attr("transform", (d, i) => `translate(0, ${i * 25})`); // Increased spacing
+
+        legendItems.append("rect")
+            .attr("width", 18) // Increased from 15
+            .attr("height", 18) // Increased from 15
+            .attr("rx", 4)
+            .style("fill", d => colorScale(d));
+
+        legendItems.append("text")
+            .attr("x", 25)
+            .attr("y", 14)
+            .style("font-size", "14px") // Increased from 12px
+            .style("fill", borderColor === '#ffffff' ? '#ffffff' : '#333')
+            .style("font-weight", "500")
+            .text(d => d);
+
+        // Ensure white text if dark background, etc. 
+        // Better: use CSS for legend text.
+    }
 }
+
 
 function getColorScale(scheme) {
     const tableau20 = [
