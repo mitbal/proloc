@@ -111,7 +111,8 @@ export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10
         .style("pointer-events", "none")
         .style("text-anchor", "middle")
         .style("font-size", d => {
-            const size = Math.max(14, Math.min(36, Math.sqrt(d.value) * 2.5));
+            const area = Math.abs(d3.polygonArea(d.polygon));
+            const size = Math.sqrt(area) * 0.12;
             return (size * labelScale) + "px";
         });
 
