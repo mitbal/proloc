@@ -144,20 +144,30 @@ export function renderVoronoiTreemap(data, containerId, colorScheme = 'tableau10
 }
 
 function getColorScale(scheme) {
+    const tableau20 = [
+        '#4e79a7', '#a0cbe8', '#f28e2c', '#ffbe7d', '#59a14f', '#8cd17d', '#b6992d', '#f1ce63', '#499894', '#86bcb6',
+        '#e15759', '#ff9d9a', '#79706e', '#bab0ac', '#d37295', '#fabfd2', '#b07aa1', '#d4a5c9', '#9c755f', '#d7b5a2'
+    ];
+
+    const category20 = [
+        '#1f77b4', '#aec7e8', '#ff7f0e', '#ffbb78', '#2ca02c', '#98df8a', '#d62728', '#ff9896', '#9467bd', '#c5b0d5',
+        '#8c564b', '#c49c94', '#e377c2', '#f7b6d2', '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5'
+    ];
+
     switch (scheme) {
         case 'category10':
-            return d3.scaleOrdinal(d3.schemeCategory10);
+            return d3.scaleOrdinal(category20);
         case 'pastel1':
             return d3.scaleOrdinal(d3.schemePastel1);
         case 'dark':
-            const darkColors = ['#1f2937', '#374151', '#4b5563', '#6b7280', '#111827'];
+            const darkColors = ['#1f2937', '#374151', '#4b5563', '#6b7280', '#111827', '#030712', '#1f2937', '#4b5563', '#312e81', '#1e1b4b', '#1e3a8a', '#172554', '#14532d', '#052e16', '#713f12', '#451a03', '#7f1d1d', '#450a0a', '#701a75', '#4a044e'];
             return d3.scaleOrdinal(darkColors);
         case 'cool':
-            return d3.scaleOrdinal(d3.quantize(d3.interpolateCool, 10));
+            return d3.scaleOrdinal(d3.quantize(d3.interpolateCool, 20));
         case 'warm':
-            return d3.scaleOrdinal(d3.quantize(d3.interpolateWarm, 10));
+            return d3.scaleOrdinal(d3.quantize(d3.interpolateWarm, 20));
         case 'tableau10':
         default:
-            return d3.scaleOrdinal(d3.schemeTableau10);
+            return d3.scaleOrdinal(tableau20);
     }
 }
